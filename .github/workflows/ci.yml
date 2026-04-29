@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  merge_group:
+    types: [checks_requested]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate JSON files
+        run: |
+          set -euo pipefail
+          fail=0
+          while IFS= read -r f; do
+            if ! python3 -m json.tool "$f" > /dev/null; then
+              echo "::error file=$f::invalid JSON"
+              fail=1
+            fi
+          done < <(git ls-files '*.json')
+          exit $fail
+
+      - name: Validate ruleset shapes
+        run: |
+          set -euo pipefail
+          for f in .github/rulesets/*.json; do
+            python3 -c "
+          import json, sys
+          d = json.load(open('$f'))
+          assert d.get('name'), 'missing name'
+          assert d.get('target') == 'branch', 'must target branch'
+          assert d.get('rules'), 'missing rules'
+          assert d.get('conditions', {}).get('ref_name'), 'missing ref_name conditions'
+          print('✓ $f')
+          "
+          done
+
+      - name: Shellcheck scripts
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+          shellcheck scripts/*.sh
+
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Frontmatter sanity (every SKILL.md has name + description)
+        run: |
+          set -euo pipefail
+          fail=0
+          while IFS= read -r f; do
+            head -n 5 "$f" | grep -q '^name:' || { echo "::error file=$f::missing 'name:' frontmatter"; fail=1; }
+            head -n 5 "$f" | grep -q '^description:' || { echo "::error file=$f::missing 'description:' frontmatter"; fail=1; }
+          done < <(git ls-files '.agent/skills/*/SKILL.md')
+          exit $fail
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No PII / hardcoded IDs leaked back in
+        run: |
+          set -euo pipefail
+          if grep -rE 'Sylwester|syziel|nasaga|AgataKa|Mariusz|c9bb957c-4eb2|d20c93cf-ac3a|0476256[0-9]|PVT_kwDODtV8184BKyTu' \
+            .agent .claude CLAUDE.md README.md; then
+            echo "::error::PII or hardcoded IDs found — see the matches above"
+            exit 1
+          fi
+          echo "✓ no leaks"
+
+      - name: project-ids.md placeholders match those used in skills/commands
+        run: |
+          set -euo pipefail
+          # Every <UPPER_SNAKE> placeholder used in skills/ or commands/ should be either:
+          #  - documented in project-ids.md, or
+          #  - one of the well-known generic placeholders.
+          KNOWN='<OWNER>|<REPO>|<DOMAIN_PRIMARY>|<DOMAIN_SECONDARY>|<SITE_NAME>|<SITE_NAME_PRIMARY>|<SITE_NAME_SECONDARY>|<SITE_ID>|<SITE_ID_PRIMARY>|<SITE_ID_SECONDARY>|<PRODUCT_STATS_FILE>|<DEMO_MILESTONE>|<STORAGE_BASE_URL>|<DB_STATS_QUERY>|<JIRA_PROJECT_KEY>|<JIRA_CLOUD_ID>|<TESTER_ACCOUNT_ID>|<TESTER_HANDLE>|<OWNER_HANDLE>|<CONTENT_OWNER_HANDLE>|<MAINTAINER>|<NETLIFY_SITE>|<SUPABASE_PROJECT_REF>|<TABLE_A>|<TABLE_B>|<PROJECT_ID>|<PROJECT_NUMBER>|<PROJECT_NAME>|<BOARD_NAME>|<STATUS_FIELD_ID>|<PRIORITY_FIELD_ID>|<SIZE_FIELD_ID>|<ITERATION_FIELD_ID>|<STATUS_TODO_ID>|<STATUS_IN_PROGRESS_ID>|<STATUS_IN_REVIEW_ID>|<STATUS_FOR_TESTING_ID>|<STATUS_DONE_ID>|<STATUS_OPTION_ID>|<PRIORITY_P0_ID>|<PRIORITY_P1_ID>|<PRIORITY_P2_ID>|<PRIORITY_P3_ID>|<PRIORITY_OPTION_ID>|<SIZE_M_ID>|<M1: Sample milestone>|<M2: Sample milestone>|<M3: Sample milestone>|<N>|<ISSUE_NUMBER>|<ITEM_ID>|<THREAD_ID_1>|<THREAD_ID_2>|<your sync command>|<feature route>|<deep-link>|<assignee>|<critical-dep-1>|<critical-dep-2>|<Author or team name>|<Twoja metryka>|<źródło>|<osoba>|<UPPER_SNAKE>'
+          # Scan and report any UNKNOWN placeholder - non-fatal, just informational
+          unknown=$(grep -hoE '<[A-Z][A-Z0-9_]+>' .agent .claude CLAUDE.md -r 2>/dev/null \
+            | sort -u \
+            | grep -vE "^($KNOWN)$" || true)
+          if [ -n "$unknown" ]; then
+            echo "::warning::Undocumented placeholders found (consider adding to project-ids.md):"
+            echo "$unknown"
+          fi
+          echo "✓ scan complete"
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify apply-rulesets.sh runs without errors (dry parse only)
+        run: |
+          set -euo pipefail
+          bash -n scripts/apply-rulesets.sh
+          echo "✓ apply-rulesets.sh syntax OK"
+
+      - name: Verify all SKILL.md files are non-empty markdown
+        run: |
+          set -euo pipefail
+          fail=0
+          for f in $(git ls-files '.agent/skills/*/SKILL.md'); do
+            if [ ! -s "$f" ]; then
+              echo "::error file=$f::SKILL.md is empty"
+              fail=1
+            fi
+          done
+          exit $fail
