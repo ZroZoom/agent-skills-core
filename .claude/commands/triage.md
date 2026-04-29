@@ -18,9 +18,16 @@ Find open GitHub issues and Jira tickets without a milestone / release target, p
 set -euo pipefail
 
 PROJECT_IDS_FILE=.agent/context/project-ids.md
-PROJECT_ID=$(awk -F'`' '/Project ID \(`PVT_\.\.\.`\)/ {print $2; exit}' "$PROJECT_IDS_FILE")
-STATUS_FIELD_ID=$(awk -F'`' '/^\| Status /         {print $4; exit}' "$PROJECT_IDS_FILE")
-FOR_TESTING_OPTION_ID=$(awk -F'`' '/^\| For testing \|/ {print $2; exit}' "$PROJECT_IDS_FILE")
+# In project-ids.md the lines look like:
+#   | Project ID (`PVT_...`) | `<PROJECT_ID>` | `gh api graphql ...` |
+#   | Status                 | `<STATUS_FIELD_ID>` | usually built-in     |
+#   | For testing            | `<STATUS_FOR_TESTING_ID>` |
+# When split by backtick, the matched value sits at field $4 for the
+# Project ID row (because the row contains an inline `PVT_...` token before it),
+# and at field $2 for plain | Field | `<VALUE>` | rows.
+PROJECT_ID=$(awk -F'`' '/Project ID \(`PVT_\.\.\.`\)/ {print $4; exit}' "$PROJECT_IDS_FILE")
+STATUS_FIELD_ID=$(awk -F'`' '/^\| Status /             {print $2; exit}' "$PROJECT_IDS_FILE")
+FOR_TESTING_OPTION_ID=$(awk -F'`' '/^\| For testing \|/   {print $2; exit}' "$PROJECT_IDS_FILE")
 
 # Halt early if any placeholder is still unresolved
 for v in PROJECT_ID STATUS_FIELD_ID FOR_TESTING_OPTION_ID; do

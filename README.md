@@ -17,10 +17,14 @@ See [`.agent/AGENTS.md`](./.agent/AGENTS.md) for the full index and trigger phra
 
 1. Use this template (GitHub: "Use this template") or copy `.agent/`, `.claude/`, and `CLAUDE.md` into your repo.
 2. **Fill in `.agent/context/project-ids.md`** — single source of truth for all GitHub Project / Jira / hosting / domain identifiers. Skills and slash commands resolve placeholders from this file at runtime.
-3. Search-and-replace remaining `<OWNER>/<REPO>` and `<DOMAIN_*>` references:
+3. Search-and-replace remaining `<OWNER>`, `<REPO>`, and `<DOMAIN_*>` references:
 
    ```bash
-   rg -l "<OWNER>/<REPO>" .agent .claude CLAUDE.md | xargs sed -i 's|<OWNER>/<REPO>|acme/widget|g'
+   # Replaces both the combined <OWNER>/<REPO> form and the standalone <OWNER> / <REPO> placeholders
+   # that appear separately in some files (e.g. .agent/context/project-ids.md, .claude/commands/merge.md).
+   rg -lE "<OWNER>|<REPO>" .agent .claude CLAUDE.md README.md \
+     | xargs sed -i 's|<OWNER>|acme|g; s|<REPO>|widget|g'
+
    rg -l "<DOMAIN_PRIMARY>"   .agent .claude | xargs sed -i 's|<DOMAIN_PRIMARY>|acme.com|g'
    rg -l "<DOMAIN_SECONDARY>" .agent .claude | xargs sed -i 's|<DOMAIN_SECONDARY>|acme.app|g'
    ```
