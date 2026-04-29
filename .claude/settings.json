@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "_comment": "Sample Claude Code settings for agent-skills-core. Customize the build/typecheck commands for your project. Hooks below: (1) block commits/pushes on main, (2) run typecheck after edits.",
+  "_comment": "Sample Claude Code settings for agent-skills-core. Hooks live in scripts/claude-hooks/ so they can be tested independently. typecheck-after-edit.sh is a no-op in non-TS repos.",
   "permissions": {
     "allow": [
       "Bash(npm run build:*)",
@@ -10,10 +10,16 @@
       "Bash(gh pr*)",
       "Bash(gh issue*)",
       "Bash(gh repo*)",
+      "Bash(gh project*)",
+      "Bash(gh api*)",
+      "Bash(gh run*)",
+      "Bash(gh release*)",
+      "Bash(gh auth status*)",
       "Bash(git status*)",
       "Bash(git log*)",
       "Bash(git diff*)",
-      "Bash(git branch*)"
+      "Bash(git branch*)",
+      "Bash(git rev-parse*)"
     ]
   },
   "hooks": {
@@ -23,7 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'CMD=\"$CLAUDE_TOOL_INPUT\"; if echo \"$CMD\" | grep -qE \"git commit|git push\"; then BRANCH=$(git branch --show-current 2>/dev/null); if [ \"$BRANCH\" = \"main\" ] || [ \"$BRANCH\" = \"master\" ]; then echo \"BLOCKED: Cannot commit/push on $BRANCH. Create a feature branch first.\" >&2; exit 2; fi; fi; exit 0'"
+            "command": "bash ./scripts/claude-hooks/block-main-git.sh"
           }
         ]
       }
@@ -34,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npx tsc --noEmit --pretty 2>&1 | tail -5"
+            "command": "bash ./scripts/claude-hooks/typecheck-after-edit.sh"
           }
         ]
       }
