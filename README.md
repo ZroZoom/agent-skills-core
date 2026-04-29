@@ -28,6 +28,14 @@ See [`.agent/AGENTS.md`](./.agent/AGENTS.md) for the full index and trigger phra
    Other placeholders (`<SITE_NAME>`, `<SITE_ID>`, `<PRODUCT_STATS_FILE>`, `<DEMO_MILESTONE>`, `<STORAGE_BASE_URL>`, `<JIRA_PROJECT_KEY>`, `<TESTER_ACCOUNT_ID>`) appear in only one or two files — fill them in inline.
 4. Drop `supabase-admin` if you don't use Supabase, or rename to your data layer (Prisma, Drizzle, raw Postgres).
 5. Drop or simplify the i18n section of `frontend-system` if your project is single-locale.
+6. **Apply branch protection** to the new repo:
+
+   ```bash
+   ./scripts/apply-rulesets.sh                                # default (solo dev + bots)
+   ./scripts/apply-rulesets.sh main-branch-protection-with-ci # stricter, with required CI checks
+   ```
+
+   See [`.github/rulesets/README.md`](./.github/rulesets/README.md) for what each ruleset enforces.
 
 ## Conventions enforced by this template
 
