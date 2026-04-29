@@ -130,11 +130,15 @@ If no argument is provided — ask the user what they want to do.
    MILESTONE_NUMBER=7
    ```
 
-6. **Write the title and body to files**, then create the PR via `--body-file`:
+6. **Write the title and body to files**, then create the PR via `--body-file`. Apply the same untrusted-input safety to the title (it can come from an issue title that contains backticks, `$()` etc.):
 
    ```bash
    set -euo pipefail
 
+   # Title
+   printf '%s' "$PR_TITLE" > /tmp/pr-title.txt
+
+   # Body
    cat > /tmp/pr-body.md <<'BODY'
    ## Description
    [what was done and why]
@@ -152,7 +156,7 @@ If no argument is provided — ask the user what they want to do.
    BODY
 
    gh pr create \
-     --title "$PR_TITLE" \
+     --title "$(cat /tmp/pr-title.txt)" \
      --body-file /tmp/pr-body.md \
      --label "ready-for-review" \
      --label "$DOMAIN_LABEL" \
