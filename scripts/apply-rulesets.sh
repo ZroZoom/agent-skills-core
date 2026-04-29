@@ -27,9 +27,13 @@ echo "→ Applying $RULESET_FILE to $REPO"
 # Strip the _comment field before sending (GitHub rejects unknown fields)
 PAYLOAD=$(jq 'del(._comment)' "$RULESET_FILE")
 
-# Find existing ruleset by name
+# Find existing ruleset by name. We DON'T interpolate the name into the gh --jq
+# filter (that would be vulnerable to jq-filter injection if a ruleset name ever
+# contained quotes or special chars). Instead, fetch JSON, then pipe through a
+# standalone jq with --arg, which guarantees the value is treated as a literal.
+RULESET_NAME_VALUE=$(jq -r .name "$RULESET_FILE")
 EXISTING_ID=$(gh api "repos/$REPO/rulesets" \
-  --jq ".[] | select(.name == \"$(jq -r .name "$RULESET_FILE")\") | .id" \
+  | jq -r --arg name "$RULESET_NAME_VALUE" '.[] | select(.name == $name) | .id' \
   | head -n1)
 
 if [[ -n "$EXISTING_ID" ]]; then
