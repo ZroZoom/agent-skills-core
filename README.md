@@ -17,19 +17,20 @@ See [`.agent/AGENTS.md`](./.agent/AGENTS.md) for the full index and trigger phra
 
 1. Use this template (GitHub: "Use this template") or copy `.agent/`, `.claude/`, and `CLAUDE.md` into your repo.
 2. **Fill in `.agent/context/project-ids.md`** — single source of truth for all GitHub Project / Jira / hosting / domain identifiers. Skills and slash commands resolve placeholders from this file at runtime.
-3. Search-and-replace remaining `<OWNER>`, `<REPO>`, and `<DOMAIN_*>` references:
+3. Replace `<OWNER>`, `<REPO>`, and any other placeholders with one cross-platform command (works the same on Linux and macOS):
 
    ```bash
-   # Replaces both the combined <OWNER>/<REPO> form and the standalone <OWNER> / <REPO> placeholders
-   # that appear separately in some files (e.g. .agent/context/project-ids.md, .claude/commands/merge.md).
-   rg -lE "<OWNER>|<REPO>" .agent .claude CLAUDE.md README.md \
-     | xargs sed -i 's|<OWNER>|acme|g; s|<REPO>|widget|g'
+   python3 scripts/fill-placeholders.py \
+     --owner my-org \
+     --repo my-app \
+     --domain-primary my-app.com \
+     --domain-secondary my-app.io \
+     --jira-project-key MYAPP
 
-   rg -l "<DOMAIN_PRIMARY>"   .agent .claude | xargs sed -i 's|<DOMAIN_PRIMARY>|acme.com|g'
-   rg -l "<DOMAIN_SECONDARY>" .agent .claude | xargs sed -i 's|<DOMAIN_SECONDARY>|acme.app|g'
+   # Inspect changes first with --dry-run, see all flags with --help.
    ```
 
-   Other placeholders (`<SITE_NAME>`, `<SITE_ID>`, `<PRODUCT_STATS_FILE>`, `<DEMO_MILESTONE>`, `<STORAGE_BASE_URL>`, `<JIRA_PROJECT_KEY>`, `<TESTER_ACCOUNT_ID>`) appear in only one or two files — fill them in inline.
+   The script only rewrites tracked text files under `.agent/`, `.claude/`, and the root `CLAUDE.md`/`README.md`, and is idempotent. Run with `--help` to see every supported placeholder.
 4. Drop `supabase-admin` if you don't use Supabase, or rename to your data layer (Prisma, Drizzle, raw Postgres).
 5. Drop or simplify the i18n section of `frontend-system` if your project is single-locale.
 6. **Apply branch protection** to the new repo:
