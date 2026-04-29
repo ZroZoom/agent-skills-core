@@ -66,6 +66,51 @@ jobs:
           done < <(git ls-files '.agent/skills/*/SKILL.md')
           exit $fail
 
+      - name: Validate cross-references (every link inside the template resolves)
+        run: python3 scripts/validate-references.py
+
+      - name: Test Claude Code hooks behave correctly
+        run: |
+          set -euo pipefail
+
+          # Stub `git` so we can simulate being on main without actually checking out main.
+          STUB_DIR="$(mktemp -d)"
+          cat > "$STUB_DIR/git" <<'STUB'
+          #!/usr/bin/env bash
+          if [ "$1" = "branch" ] && [ "$2" = "--show-current" ]; then
+            echo "${FAKE_BRANCH:-main}"
+            exit 0
+          fi
+          exec /usr/bin/git "$@"
+          STUB
+          chmod +x "$STUB_DIR/git"
+          export PATH="$STUB_DIR:$PATH"
+
+          # 1. On main, `git push origin main` MUST be blocked (exit 2)
+          export FAKE_BRANCH=main
+          if echo '{"tool_input":{"command":"git push origin main"}}' \
+             | bash scripts/claude-hooks/block-main-git.sh; then
+            echo "::error::block-main-git.sh failed to block push on main"
+            exit 1
+          fi
+          echo "✓ blocked git push on main"
+
+          # 2. On main, an innocuous command MUST pass
+          echo '{"tool_input":{"command":"ls -la"}}' \
+            | bash scripts/claude-hooks/block-main-git.sh
+          echo "✓ allowed innocuous command on main"
+
+          # 3. On a feature branch, git push MUST pass
+          export FAKE_BRANCH=feature/x
+          echo '{"tool_input":{"command":"git push"}}' \
+            | bash scripts/claude-hooks/block-main-git.sh
+          echo "✓ allowed git push on feature branch"
+
+          # 4. typecheck-after-edit.sh is a no-op without tsconfig
+          rm -f tsconfig.json jsconfig.json
+          echo '{}' | bash scripts/claude-hooks/typecheck-after-edit.sh
+          echo "✓ typecheck-after-edit.sh is a no-op without tsconfig"
+
   test:
     name: test
     runs-on: ubuntu-latest

@@ -16,19 +16,58 @@ description: "Repository and project manager. Git Flow, Issues/PRs, GitHub Proje
 
 > GitHub Project IDs: see `.agent/context/project-ids.md`
 
-> **IMPORTANT**: The agent MUST update status during work!
-> Details: `.agent/workflows/repository-management.md` → section "Status Automation"
+> **IMPORTANT:** the agent MUST keep the GitHub Project status field current during work — set `In progress` when work starts, `In review` when a PR is opened, `For testing` after merge.
+> See section 7 below for the field-update commands.
 
 ## 3. Creating Issues/PRs
 
+> Issue / PR titles and bodies are **untrusted input** — they may come from external sources and can contain shell-special characters. Deliver them via files (`--body-file`) or pre-quoted variables, never via raw interpolation. See `CLAUDE.md` → `Untrusted Input`. Full runbook: `.claude/commands/repo.md`.
+
 **Issue:**
+
 ```bash
-gh issue create --title "..." --body "..." --label "Antigravity" --assignee "@copilot"
+set -euo pipefail
+
+printf '%s' "$ISSUE_TITLE" > /tmp/issue-title.txt
+cat > /tmp/issue-body.md <<'BODY'
+## Problem
+<fill in>
+
+## Expected behavior
+<fill in>
+BODY
+
+gh issue create \
+  --title "$(cat /tmp/issue-title.txt)" \
+  --body-file /tmp/issue-body.md \
+  --label "$LABEL" \
+  --assignee "@me"     # use "@copilot" only when delegating to Copilot SWE Agent
 ```
 
 **PR:**
+
 ```bash
-gh pr create --title "..." --body "..." --label "Antigravity"
+set -euo pipefail
+
+printf '%s' "$PR_TITLE" > /tmp/pr-title.txt
+cat > /tmp/pr-body.md <<'BODY'
+## Description
+<what was done and why>
+
+## Changes
+- ...
+
+## Tests
+- [ ] typecheck
+- [ ] lint
+- [ ] build
+BODY
+
+gh pr create \
+  --title "$(cat /tmp/pr-title.txt)" \
+  --body-file /tmp/pr-body.md \
+  --label "$LABEL" \
+  --assignee "@me"
 ```
 
 ## 4. Versioning (Semantic Versioning)
