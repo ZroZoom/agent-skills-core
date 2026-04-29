@@ -90,21 +90,21 @@ Report items NOT in the project and issues without a milestone.
 ## Format
 
 ```
-## GitHub Project: Szkoła Przyszłości AI — Development
+## GitHub Project: <PROJECT_NAME> — <BOARD_NAME>
 
 **Board:**
 | Status | Count |
 |---|---:|
-| Done | 485 |
-| For testing | 98 |
-| In progress | 1 |
-| Backlog | 16 |
+| Done | <N> |
+| For testing | <N> |
+| In progress | <N> |
+| Backlog | <N> |
 
 **Milestones:**
 | Milestone | Progress | Due | Status |
 |---|---|---|---|
-| M1: Security & Compliance | 12/13 (92%) | 2026-05-15 | 🟢 1 left, 37d |
-| M2: Matematyka E8 Ready | 14/16 (88%) | 2026-06-15 | 🟢 on track |
+| <M1: Sample milestone> | 12/13 (92%) | 2026-05-15 | 🟢 1 left, 37d |
+| <M2: Sample milestone> | 14/16 (88%) | 2026-06-15 | 🟢 on track |
 | <M3: Sample milestone> | 0/10 (0%) | 2026-07-15 | 🔴 not started, 98d |
 
 **Open PRs:**

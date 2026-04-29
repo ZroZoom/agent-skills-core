@@ -40,7 +40,7 @@ git log --since='7 days ago' --diff-filter=AM --name-only --pretty=format: -- '.
 ## 10. Jira — active tickets (project <JIRA_PROJECT_KEY>)
 
 Use the Atlassian MCP tool `searchJiraIssuesUsingJql` with:
-- cloudId: `04762561-2290-48a3-97b3-3700f99ca8ee`
+- cloudId: `<JIRA_CLOUD_ID>`
 - jql: `project = <JIRA_PROJECT_KEY> AND status NOT IN (Done, Closed) ORDER BY updated DESC`
 - limit: 10
 

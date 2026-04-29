@@ -73,7 +73,7 @@ Report the count and list the oldest or most important items.
 
 Use Atlassian MCP when available:
 
-- cloudId: `04762561-2290-48a3-97b3-3700f99ca8ee`
+- cloudId: `<JIRA_CLOUD_ID>`
 - JQL:
 
 ```text
