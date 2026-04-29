@@ -55,4 +55,4 @@ Extracted and de-personalized from `ZroZoom/Szkola_Przyszlosci_AI` (an EdTech pl
 
 ## License
 
-Match the license of the parent project, or relicense as you wish — these are configuration files, not application code.
+[MIT](./LICENSE) © 2026 ZroZoom AI. Use freely in commercial or private projects; the only requirement is keeping the copyright notice in copies / substantial portions of the files.
