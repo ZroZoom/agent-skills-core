@@ -79,7 +79,7 @@ The slash commands in `.claude/commands/` follow these patterns — if you add n
 
 ## Git Rules (CRITICAL)
 
-> Full details: `.agent/skills/repo-ops/SKILL.md`
+> Full details: `.agent/skills/repo-ops/SKILL.md`. Server-side enforcement: `.github/rulesets/main-branch-protection.json` (apply with `scripts/apply-rulesets.sh`).
 
 - **NEVER commit to `main`** — always use feature branches (`feature/*`, `fix/*`, `chore/*`)
 - **NEVER use `git stash`** — ask the user: "Keep (WIP commit) or discard?"
