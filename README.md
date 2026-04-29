@@ -31,8 +31,9 @@ See [`.agent/AGENTS.md`](./.agent/AGENTS.md) for the full index and trigger phra
 6. **Apply branch protection** to the new repo:
 
    ```bash
-   ./scripts/apply-rulesets.sh                                # default (solo dev + bots)
-   ./scripts/apply-rulesets.sh main-branch-protection-with-ci # stricter, with required CI checks
+   ./scripts/apply-rulesets.sh                                              # default (solo dev + bots)
+   ./scripts/apply-rulesets.sh main-branch-protection-with-ci               # + required CI checks
+   ./scripts/apply-rulesets.sh main-branch-protection-with-bots-and-queue   # + Copilot review + merge queue
    ```
 
    See [`.github/rulesets/README.md`](./.github/rulesets/README.md) for what each ruleset enforces.
