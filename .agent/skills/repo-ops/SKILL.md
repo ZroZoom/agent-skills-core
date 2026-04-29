@@ -94,12 +94,14 @@ gh issue list --label "" --limit 50
 
 ### Commands
 
+> All `<UPPER_SNAKE>` placeholders below come from `.agent/context/project-ids.md`. If any value is still `<...>`, halt and ask the user to fill it in — do NOT make up an ID.
+
 ```bash
 # Move Issue to "To Do"
-gh project item-edit --project-id PVT_kwDODtV8184BKyTu --id <ITEM_ID> --field-id <STATUS_FIELD_ID> --single-select-option-id 61e4505c
+gh project item-edit --project-id <PROJECT_ID> --id <ITEM_ID> --field-id <STATUS_FIELD_ID> --single-select-option-id <STATUS_TODO_ID>
 
 # Set priority to P1
-gh project item-edit --project-id PVT_kwDODtV8184BKyTu --id <ITEM_ID> --field-id <PRIORITY_FIELD_ID> --single-select-option-id 0a877460
+gh project item-edit --project-id <PROJECT_ID> --id <ITEM_ID> --field-id <PRIORITY_FIELD_ID> --single-select-option-id <PRIORITY_P1_ID>
 ```
 
 ## 8. Syncing with ROADMAP.md
@@ -220,23 +222,21 @@ gh api graphql -f query='mutation {
 
 Squash-merge takes the **full branch diff vs base**, not the last commit. A stale branch state can pull in reverted changes.
 
-After every squash-merge, run this (< 30 seconds):
+After every squash-merge, run a short sanity check (< 30 seconds). Adjust the patterns to whatever your project is sensitive to (e.g. lockfile drift, generated config files, or critical dependency versions):
 
 ```bash
-# 1. Check key dependencies on main
+set -euo pipefail
 git fetch origin
-git show origin/main:package.json | grep -E '"netlify-cli|"serialize-javascript'
 
-# 2. Check lockfile (whether the optional:true fix didn't vanish)
-git show origin/main:package-lock.json | python3 -c "
-import json,sys
-d=json.load(sys.stdin)
-missing=[k for k,v in d.get('packages',{}).items()
-         if 'netlify-cli/node_modules' in k
-         and ('os' in v or 'cpu' in v)
-         and not v.get('optional')]
-print(f'BRAK optional:true: {len(missing)} wpisów — NAPRAW!' if missing else 'OK — lockfile czysty')
-"
+# 1. Check key dependencies on main
+git show origin/main:package.json | grep -E '"<critical-dep-1>|"<critical-dep-2>'
+
+# 2. Optional: deeper lockfile sanity check (example: optional native deps not stripped)
+# git show origin/main:package-lock.json | python3 -c "
+# import json, sys
+# d = json.load(sys.stdin)
+# # ... project-specific assertions ...
+# "
 ```
 
 If anything is off → **STOP, investigate before pushing**.

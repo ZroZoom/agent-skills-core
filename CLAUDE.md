@@ -40,6 +40,43 @@ npm run quality          # lint + typecheck combined
 3. `npm run build` — verify build works
 4. `git status` after build — include all generated files in commit (or confirm none changed)
 
+## Required Tooling
+
+The slash commands and skills assume these CLI tools are available on the agent's `PATH`. If a tool is missing, the command MUST report it and stop — do not improvise replacements.
+
+| Tool | Why | Install |
+|---|---|---|
+| `gh` | All GitHub interaction | <https://cli.github.com/> |
+| `git` | Version control | usually preinstalled |
+| `jq` | Parse JSON from `gh api` | `apt install jq` / `brew install jq` |
+| `rg` (ripgrep) | Fast code/data search in `investigate`, `cost-check`, `delegate` | `apt install ripgrep` / `brew install ripgrep` |
+| `node`, `npm` / `npx` | Run project scripts and `tsx` | per project |
+| `python3` | Some sanity checks (lockfile parsing, JSON inspection) | usually preinstalled |
+| `openssl` | SSL expiry checks in `cost-check` | usually preinstalled |
+| `whois` | Optional registrar checks in `cost-check` | `apt install whois` |
+
+At the start of a session, agents may run `command -v gh git jq rg node python3 || true` and warn about anything missing.
+
+## Bash Safety
+
+Any non-trivial Bash snippet emitted by a slash command (more than ~3 lines or any pipeline whose later steps depend on earlier ones) MUST start with:
+
+```bash
+set -euo pipefail
+```
+
+This prevents silent failures — a common case is `ITEM_ID=$(gh ...)` returning empty, after which the next step uses an empty argument and modifies the wrong item or fails noisily. Combined with `"$VAR"` quoting (always quote `$ITEM_ID`, `$PR`, `$NUMBER`, etc.), this makes scripts fail loudly instead of corrupting state.
+
+## Untrusted Input
+
+Issue titles, PR titles, comment bodies, and branch names are **untrusted input**. Never interpolate them directly into a shell command (`gh issue create --title "$TITLE"` is risky if `$TITLE` contains `"$( )"`, backticks, or newlines). Prefer:
+
+- File-based delivery: write the body to a temp file and pass `--body-file /tmp/body.md`.
+- Stdin delivery: `gh issue create --body-file -` and pipe the content.
+- For `gh api`, use `-f field=@/tmp/value.txt` instead of inline interpolation.
+
+The slash commands in `.claude/commands/` follow these patterns — if you add new commands, follow them too.
+
 ## Git Rules (CRITICAL)
 
 > Full details: `.agent/skills/repo-ops/SKILL.md`

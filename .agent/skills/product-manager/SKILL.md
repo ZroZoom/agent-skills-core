@@ -240,24 +240,26 @@ ITEM_ID=$(gh api graphql -F number=$PR_NUMBER -f query='
     }
   }' --jq '.data.repository.pullRequest.projectItems.nodes[0].id')
 
-# IDs: see .agent/context/project-ids.md
+# All <UPPER_SNAKE> values below come from .agent/context/project-ids.md.
+# If any is still `<...>`, halt and ask the user to fill it in.
+
 # 3. Set Priority to P1
-gh project item-edit --id $ITEM_ID \
-  --project-id PVT_kwDODtV8184BKyTu \
-  --field-id PVTSSF_lADODtV8184BKyTuzg6jZAU \
-  --single-select-option-id 0a877460
+gh project item-edit --id "$ITEM_ID" \
+  --project-id <PROJECT_ID> \
+  --field-id <PRIORITY_FIELD_ID> \
+  --single-select-option-id <PRIORITY_P1_ID>
 
 # 4. Set Size to M
-gh project item-edit --id $ITEM_ID \
-  --project-id PVT_kwDODtV8184BKyTu \
-  --field-id PVTSSF_lADODtV8184BKyTuzg6jZAY \
-  --single-select-option-id 7515a9f1
+gh project item-edit --id "$ITEM_ID" \
+  --project-id <PROJECT_ID> \
+  --field-id <SIZE_FIELD_ID> \
+  --single-select-option-id <SIZE_M_ID>
 
 # 5. Set Status to "In progress"
-gh project item-edit --id $ITEM_ID \
-  --project-id PVT_kwDODtV8184BKyTu \
-  --field-id PVTSSF_lADODtV8184BKyTuzg6jYRw \
-  --single-select-option-id 47fc9ee4
+gh project item-edit --id "$ITEM_ID" \
+  --project-id <PROJECT_ID> \
+  --field-id <STATUS_FIELD_ID> \
+  --single-select-option-id <STATUS_IN_PROGRESS_ID>
 ```
 
 ### Available Labels

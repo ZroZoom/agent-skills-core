@@ -8,8 +8,13 @@ This directory is read first by Claude Code in the workspace root.
 .claude/
 ├── settings.json              # Permissions + hooks (typecheck after edit, block main commits)
 ├── commands/                  # 18 slash commands ready to use
+├── memory/                    # Cross-agent shared learnings (39 universal feedbacks + index)
 └── hookify-examples/          # 8 sample hookify rules — copy to .claude/ root and enable
 ```
+
+## Memory
+
+`.claude/memory/MEMORY.md` is the **router**. Each `feedback_*.md` is a single rule learned from a real mistake. Sessions read the index at startup and load specific files on demand. Add new entries via `/self-analysis` at session end.
 
 ## Slash commands
 

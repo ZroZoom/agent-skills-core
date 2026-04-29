@@ -21,26 +21,25 @@ Use the CLI to generate migration files:
 After every schema change, run:
 
 1. `npm run update-types` (Generates `src/types/supabase.ts`).
-2. If `subjects`, `topics`, or `levels` tables were changed → `npm run sync-metadata`.
+2. If a table listed in `.agent/context/project-ids.md` → `Tables / collections that affect content layout` changed → run the regen script registered there (e.g. `npm run sync-metadata`).
 
-## 3. Resource Status (CRITICAL)
+## 3. Sensitive INSERTs (CRITICAL)
 
 > [!CAUTION]
-> **NEVER set `status: 'approved'` in migrations!**
-> In the past (2025-12-31) this approach caused unverified content to be published.
-> Details: see `.agent/SESSION_LEARNINGS.md` (archived from 2025-12-31 session).
+> **Never insert rows with a "published / approved" status from a migration unless that data has been reviewed.**
+> Real incident: a migration that defaulted `status: 'approved'` published unverified content.
 
 **Rule:**
 
-- INSERT into `resources` → Always use `status: 'pending'` (default).
-- Only exception: seed data for the local database.
+- INSERTs from migrations into status-gated tables (e.g. `resources`, `posts`, `lessons`) → always use the safe default (`pending`, `draft`).
+- Only exception: seed data for the local development database.
 
 ## 4. Helper Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run update-types` | Update TypeScript types from Supabase |
-| `npm run sync-metadata` | Sync subjects/levels metadata |
+| `npm run update-types` | Update TypeScript types from the database |
+| `<your sync command>` | Whatever your project uses to regenerate downstream artifacts after schema changes (register in `project-ids.md`) |
 
 ## 5. Security
 
@@ -51,7 +50,7 @@ After every schema change, run:
 
 ## 6. RLS Policies — Best Practices
 
-- **Helpers**: Before writing a policy, check existing helpers (`grep -rE "is_admin|is_teacher|is_owner" supabase/migrations/`). Use `is_admin()` instead of inline `EXISTS (SELECT 1 FROM profiles ...)`.
+- **Helpers**: Before writing a policy, check existing helpers (e.g. `grep -rE "is_admin|is_owner" supabase/migrations/`). Use centralized helper functions instead of inline `EXISTS (SELECT 1 FROM profiles ...)`.
 - **Idempotency**: Always `DROP POLICY IF EXISTS "..."` before `CREATE POLICY` — a migration may be re-run from the SQL Editor.
 - **Admin policies**: Every table with user data should have an admin SELECT policy (not just user-own). Without it, the admin panel shows 0 records.
 
