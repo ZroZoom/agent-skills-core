@@ -20,6 +20,10 @@ See [`.agent/AGENTS.md`](./.agent/AGENTS.md) for the full index and trigger phra
 3. Replace `<OWNER>`, `<REPO>`, and any other placeholders with one cross-platform command (works the same on Linux and macOS):
 
    ```bash
+   # Guided setup:
+   python3 scripts/fill-placeholders.py --interactive
+
+   # Or non-interactive / CI-friendly:
    python3 scripts/fill-placeholders.py \
      --owner my-org \
      --repo my-app \
@@ -30,7 +34,7 @@ See [`.agent/AGENTS.md`](./.agent/AGENTS.md) for the full index and trigger phra
    # Inspect changes first with --dry-run, see all flags with --help.
    ```
 
-   The script only rewrites tracked text files under `.agent/`, `.claude/`, and the root `CLAUDE.md`/`README.md`, and is idempotent. Run with `--help` to see every supported placeholder.
+   The script only rewrites tracked text files under `.agent/`, `.claude/`, and the root `CLAUDE.md`/`README.md`, and is idempotent. Use `--dry-run` to preview changes. Run with `--help` to see every supported placeholder.
 4. Drop `supabase-admin` if you don't use Supabase, or rename to your data layer (Prisma, Drizzle, raw Postgres).
 5. Drop or simplify the i18n section of `frontend-system` if your project is single-locale.
 6. Drop `dispatch-watcher` unless your team runs chat-driven agent dispatch from Slack/Teams-style channels.
