@@ -142,7 +142,15 @@ def main() -> int:
     replacements = build_replacements(args)
 
     if not replacements:
-        print("✗ No replacements specified. Pass flags or run with --interactive.", file=sys.stderr)
+        if args.interactive:
+            print(
+                "✗ No replacements specified. Interactive setup did not collect any values "
+                "(stdin may be closed).",
+                file=sys.stderr,
+            )
+            print("  Provide values at the prompts, pipe answers, or pass flags.", file=sys.stderr)
+        else:
+            print("✗ No replacements specified. Pass flags or run with --interactive.", file=sys.stderr)
         print("  Run with --help to see all flags.", file=sys.stderr)
         return 1
 
