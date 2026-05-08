@@ -4,7 +4,7 @@
 >
 > **What this is NOT.** Per-machine user memory (e.g. `~/.claude/projects/<repo>/memory/`) that's invisible to other agents. The files here are committed and shared.
 >
-> **How to add an entry.** At session end (`/self-analysis`), write a single-paragraph file `feedback_<short-slug>.md` with frontmatter `name`, `description`, `type: feedback`, then a `## Why` and `## How to apply`. Keep entries < 25 lines. Link them from this index so they're discoverable.
+> **How to add an entry.** At session end (`/self-analysis`), write a single-paragraph file `feedback_<short-slug>.md` with frontmatter `name`, `description`, `type: feedback`, then bold `**Why:**` and `**How to apply:**` sections. Keep entries < 25 lines. Link them from this index so they're discoverable.
 >
 > **Editor's note.** This template ships with **49 universal feedback files** distilled from a real production codebase. Some refer to specific PR numbers — those are kept as evidence of when/why the rule was learned. Drop or replace any entry that doesn't fit your project. Add `user_*.md`, `project_*.md`, and `reference_*.md` files as your team grows; this template intentionally ships **without** those (they're project-specific).
 
