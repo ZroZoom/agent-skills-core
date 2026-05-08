@@ -6,6 +6,19 @@ Project-level override of the built-in `/review`. Performs the standard code rev
 
 > **Required tooling:** `gh`, `jq`. **`<OWNER>` / `<REPO>` resolve from `.agent/context/project-ids.md`** — halt if still placeholders.
 
+## 0. Memory consult
+
+Read these in full before starting:
+
+- `.claude/memory/feedback_verify_bot_claims.md` — bot suggestions are hypotheses; verify against source.
+- `.claude/memory/feedback_bot_review_triage.md` — how to assess and dismiss bot suggestions.
+- `.claude/memory/feedback_bot_fix_reaudit.md` — re-read whole affected units after bot-driven fixes.
+- `.claude/memory/feedback_pr_review_loop.md` — check for new review threads after each push.
+- `.claude/memory/feedback_review_proactive.md` — do not wait for the user to ask about new comments.
+- `.claude/memory/feedback_grounding_in_project.md` — assess against this repo's conventions, not generic taste.
+
+If a new review failure mode lands in `MEMORY.md`, add the most relevant file here.
+
 ## 1. Resolve PR number
 
 If no PR number in args:

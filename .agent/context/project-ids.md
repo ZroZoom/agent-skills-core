@@ -95,6 +95,9 @@ Capture from the query above and paste here:
 | Migration path | `supabase/migrations/` |
 | Generated types path | `src/types/supabase.ts` |
 | Sync command | `npm run update-types` |
+| Local start command | `npm run db:start` |
+| Local reset command | `npm run db:reset` |
+| Local type sync command | `npm run update-types:local` |
 
 ## Tables / collections that affect content layout
 

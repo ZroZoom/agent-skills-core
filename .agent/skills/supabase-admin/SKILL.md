@@ -15,6 +15,27 @@ Use the CLI to generate migration files:
 - [ ] Table has a primary key (typically `UUID`).
 - [ ] `ALTER TABLE ... ENABLE ROW LEVEL SECURITY;` (Mandatory!).
 - [ ] Policies added for `anon` (if public) and `authenticated`.
+- [ ] Migration was replayed locally or in a disposable preview/staging database before remote deploy.
+- [ ] If local replay is temporarily blocked by baseline drift, document the alternative validation path in the PR.
+
+### Local Supabase development
+
+For Supabase projects, prefer a local stack or disposable preview database before pushing migrations to the remote project.
+
+Recommended `package.json` scripts:
+
+| Command | Purpose |
+|---|---|
+| `npm run db:start` | Start the local Supabase Docker stack |
+| `npm run db:stop` | Stop the local stack |
+| `npm run db:status` | Print local URLs and anon/service keys |
+| `npm run db:reset` | Replay all migrations and seed data locally |
+| `npm run db:diff` | Diff linked remote/staging schema against local migrations |
+| `npm run update-types:local` | Generate TypeScript types from the local stack |
+
+Use an `.env.local` override with only the local `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values. Do not copy a full `.env.example` into `.env.local` if it contains placeholder production/staging variables; Vite gives `.env.local` high precedence and placeholders can silently override valid values.
+
+If `db:reset` fails on a fresh local stack because the production schema predated migration tracking, capture the missing baseline in a dedicated migration or validate in a preview/staging project until the baseline is fixed. Do not link a local checkout to production just to test migrations.
 
 ## 2. Syncing with the Application
 
@@ -38,7 +59,11 @@ After every schema change, run:
 
 | Command | Description |
 |---------|-------------|
-| `npm run update-types` | Update TypeScript types from the database |
+| `npm run update-types` | Update TypeScript types from the remote/staging database |
+| `npm run update-types:local` | Update TypeScript types from the local Supabase stack |
+| `npm run db:start` | Start local Supabase stack (Docker) |
+| `npm run db:reset` | Replay all migrations and seed data locally |
+| `npm run db:stop` | Stop local Supabase stack |
 | `<your sync command>` | Whatever your project uses to regenerate downstream artifacts after schema changes (register in `project-ids.md`) |
 
 ## 5. Security

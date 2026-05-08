@@ -8,7 +8,7 @@ This directory is read first by Claude Code in the workspace root.
 .claude/
 ├── settings.json              # Permissions + hooks (typecheck after edit, block main commits)
 ├── commands/                  # 18 slash commands ready to use
-├── memory/                    # Cross-agent shared learnings (39 universal feedbacks + index)
+├── memory/                    # Cross-agent shared learnings (49 universal feedbacks + index)
 └── hookify-examples/          # 8 sample hookify rules — copy to .claude/ root and enable
 ```
 

@@ -39,8 +39,20 @@ gh pr list \
   --repo <OWNER>/<REPO> \
   --state merged \
   --search "merged:>=$BASE_DATE base:main" \
-  --limit 200 \
+  --limit 500 \
   --json number,title,mergedAt,author,labels,url
+```
+
+Use `--limit 500` for any range longer than a few days. Repos with merge queues, dependency groups, or automatic version bumps can exceed 200 merged PRs in a month. Confirm the count before writing notes:
+
+```bash
+gh pr list \
+  --repo <OWNER>/<REPO> \
+  --state merged \
+  --search "merged:>=$BASE_DATE base:main" \
+  --limit 500 \
+  --json number \
+  --jq 'length'
 ```
 
 Also inspect commits if PR data is incomplete:
@@ -64,9 +76,10 @@ Use title prefixes first, then labels:
 
 Exclude noise:
 
-- version bump PRs unless they are the release itself
+- version bump PRs unless they are the release itself; collapse automatic bumps into a short `Not included` note and keep at most one bullet for the highest version reached
 - reverted PRs when the revert also merged in range
 - duplicate squash commits
+- grouped dependency bumps; list the count and impact once instead of enumerating every package bump
 
 ### 4. Write PL and EN outputs
 
