@@ -51,7 +51,8 @@ export MODEL_HANDLE="${MODEL_HANDLE:-@codex}"
 export AGENT_DISPATCH_CHANNEL="${AGENT_DISPATCH_CHANNEL:-agent-dispatch}"
 
 test -n "${GH_TOKEN_AGENT_BOT:-}" || { echo "GH_TOKEN_AGENT_BOT is required" >&2; exit 1; }
-GH_TOKEN="$GH_TOKEN_AGENT_BOT" gh auth status
+export GH_TOKEN="$GH_TOKEN_AGENT_BOT"
+gh auth status
 gh repo view <OWNER>/<REPO> --json nameWithOwner
 ```
 
@@ -79,19 +80,24 @@ Post a claim comment:
 
 ```bash
 ISSUE_NUM=<issue-number>
-CLAIM_BODY="<!-- claim: ${AGENT_ID} --> Taking #${ISSUE_NUM} - ${AGENT_ID}"
+case "$ISSUE_NUM" in ''|*[!0-9]*) echo "Invalid issue number: $ISSUE_NUM" >&2; exit 1 ;; esac
 
-GH_TOKEN="$GH_TOKEN_AGENT_BOT" gh issue comment "$ISSUE_NUM" \
+CLAIM_BODY="<!-- claim: ${AGENT_ID} --> Taking #${ISSUE_NUM} - ${AGENT_ID}"
+CLAIM_FILE="$(mktemp)"
+trap 'rm -f "$CLAIM_FILE"' EXIT
+printf '%s\n' "$CLAIM_BODY" > "$CLAIM_FILE"
+
+gh issue comment "$ISSUE_NUM" \
   --repo <OWNER>/<REPO> \
-  --body "$CLAIM_BODY"
+  --body-file "$CLAIM_FILE"
 ```
 
 Wait three seconds, then re-read claim comments and sort by `(created_at, id)`:
 
 ```bash
-GH_TOKEN="$GH_TOKEN_AGENT_BOT" gh api \
-  "repos/<OWNER>/<REPO>/issues/${ISSUE_NUM}/comments" \
-  --jq '[.[] | select(.body | startswith("<!-- claim:")) | {id, created_at, body}] | sort_by(.created_at, .id)'
+gh api --paginate --slurp \
+  "repos/<OWNER>/<REPO>/issues/${ISSUE_NUM}/comments?per_page=100" \
+  | jq 'add | map(select(.body | startswith("<!-- claim:")) | {id, created_at, body}) | sort_by([.created_at, .id])'
 ```
 
 You win if the first claim starts with `<!-- claim: ${AGENT_ID} -->`.
@@ -108,7 +114,7 @@ Post:
 Best-effort labels:
 
 ```bash
-GH_TOKEN="$GH_TOKEN_AGENT_BOT" gh issue edit "$ISSUE_NUM" \
+gh issue edit "$ISSUE_NUM" \
   --repo <OWNER>/<REPO> \
   --add-label "claimed-by:agent,status:in-flight" || true
 ```
@@ -120,7 +126,7 @@ Labels are optional. If your repo does not use them, remove or rename this step.
 Fetch the issue:
 
 ```bash
-GH_TOKEN="$GH_TOKEN_AGENT_BOT" gh issue view "$ISSUE_NUM" \
+gh issue view "$ISSUE_NUM" \
   --repo <OWNER>/<REPO> \
   --json number,title,body,labels,assignees,milestone,url
 ```

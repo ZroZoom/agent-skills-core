@@ -33,7 +33,7 @@ Recommended `package.json` scripts:
 | `npm run db:diff` | Diff linked remote/staging schema against local migrations |
 | `npm run update-types:local` | Generate TypeScript types from the local stack |
 
-Use an `.env.local` override with only the local `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values. Do not copy a full `.env.example` into `.env.local` if it contains placeholder production/staging variables; Vite gives `.env.local` high precedence and placeholders can silently override valid values.
+Use an `.env.local` override with only the local public Supabase URL and anon-key variables, such as `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Next.js or `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` in Vite. Do not copy a full `.env.example` into `.env.local` if it contains placeholder production/staging variables; framework env loaders often give `.env.local` high precedence and placeholders can silently override valid values.
 
 If `db:reset` fails on a fresh local stack because the production schema predated migration tracking, capture the missing baseline in a dedicated migration or validate in a preview/staging project until the baseline is fixed. Do not link a local checkout to production just to test migrations.
 
