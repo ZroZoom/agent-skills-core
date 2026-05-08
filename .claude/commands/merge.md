@@ -6,6 +6,20 @@ Merge a PR via the manual checklist (default) or via an automated merge supervis
 
 > **Required tooling:** `gh`, `git`, `jq`. Set `set -euo pipefail` at the top of any multi-step block.
 
+## 0. Memory consult
+
+Read these in full before starting; they prevent the common merge-loop failure modes:
+
+- `.claude/memory/feedback_verify_state_before_claim.md` — fresh-query PR state before saying clean/ready.
+- `.claude/memory/feedback_supervisor_loop_bypass.md` — what to do when a supervisor cycles without progress.
+- `.claude/memory/feedback_hooks_timeout_big_merges.md` — large merges can exceed short background timeouts; never use `--no-verify`.
+- `.claude/memory/feedback_batch_merge_cascade.md` — mass merges can force conflicts across other open branches.
+- `.claude/memory/feedback_fetch_before_push.md` — automation may add commits to the PR branch; fetch before pushing.
+- `.claude/memory/feedback_for_testing_flow.md` — move work into the QA/testing lane after merge when your project uses one.
+- `.claude/memory/feedback_post_merge.md` — post-merge cleanup checklist.
+
+If a new merge failure mode lands in `MEMORY.md`, add the most relevant file here.
+
 ## 1. Identify the PR
 
 ```bash

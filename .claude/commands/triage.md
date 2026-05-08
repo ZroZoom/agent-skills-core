@@ -6,6 +6,19 @@ Backlog prioritization for GitHub issues and Jira tickets without a milestone / 
 
 > **Required tooling:** `gh`, `jq`, `awk`. **All `<UPPER_SNAKE>` placeholders come from `.agent/context/project-ids.md`.** If any value is still `<...>`, halt and ask the user to fill it in — do not improvise IDs.
 
+## 0. Memory consult
+
+Read these in full before starting backlog or QA triage:
+
+- `.claude/memory/feedback_for_testing_flow.md` — merged work may need a testing lane, not immediate closure.
+- `.claude/memory/feedback_qa_ticket_status.md` — create QA tickets in the default/to-do state.
+- `.claude/memory/feedback_pr_setup.md` — labels, assignee, and project fields after PR/issue creation.
+- `.claude/memory/feedback_pr_path_overlap_check.md` — avoid bundling leftovers already covered by another PR.
+- `.claude/memory/feedback_grounding_in_project.md` — prioritize from observed project data, not generic heuristics.
+- `.claude/memory/feedback_codex_quality.md` — audit agent-created placeholders and topical relevance.
+
+If a new triage failure mode lands in `MEMORY.md`, add the most relevant file here.
+
 ## Scope
 
 Find open GitHub issues and Jira tickets without a milestone / release target, propose priority and ownership, and report the `For testing` queue size.

@@ -24,6 +24,7 @@
 | review-agent | Audit AI-generated PRs (Claude / Codex / Copilot) | `.agent/skills/review-agent/SKILL.md` |
 | release-notes | Bilingual changelog from merged PRs | `.agent/skills/release-notes/SKILL.md` |
 | product-manager | Release cycle, quality gates, blocker management | `.agent/skills/product-manager/SKILL.md` |
+| dispatch-watcher | Optional chat-driven issue dispatch loop | `.agent/skills/dispatch-watcher/SKILL.md` |
 
 ### Operations & business
 

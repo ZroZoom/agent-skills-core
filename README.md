@@ -4,10 +4,10 @@ Project-agnostic Claude Code / multi-agent skills extracted from a real Next.js 
 
 ## What's inside
 
-17 universal skills, organized into four groups:
+18 universal skills, organized into four groups:
 
 - **Engineering** (5): `code-quality`, `test-automation`, `test-manager`, `supabase-admin`, `frontend-system`
-- **Repo & PM** (6): `repo-ops`, `backlog-triage`, `delegate`, `review-agent`, `release-notes`, `product-manager`
+- **Repo & PM** (7): `repo-ops`, `backlog-triage`, `delegate`, `review-agent`, `release-notes`, `product-manager`, `dispatch-watcher`
 - **Ops & business** (4): `demo-check`, `cost-check`, `investor-report`, `growth-strategist`
 - **Content** (2): `blog-editor`, `social-media`
 
@@ -33,7 +33,8 @@ See [`.agent/AGENTS.md`](./.agent/AGENTS.md) for the full index and trigger phra
    The script only rewrites tracked text files under `.agent/`, `.claude/`, and the root `CLAUDE.md`/`README.md`, and is idempotent. Run with `--help` to see every supported placeholder.
 4. Drop `supabase-admin` if you don't use Supabase, or rename to your data layer (Prisma, Drizzle, raw Postgres).
 5. Drop or simplify the i18n section of `frontend-system` if your project is single-locale.
-6. **Apply branch protection** to the new repo:
+6. Drop `dispatch-watcher` unless your team runs chat-driven agent dispatch from Slack/Teams-style channels.
+7. **Apply branch protection** to the new repo:
 
    ```bash
    ./scripts/apply-rulesets.sh                                              # default (solo dev + bots)
