@@ -9,6 +9,9 @@ and macOS) and idempotent.
 Usage:
     python3 scripts/fill-placeholders.py --owner my-org --repo my-app
 
+    # interactive setup wizard:
+    python3 scripts/fill-placeholders.py --interactive
+
     # with more placeholders:
     python3 scripts/fill-placeholders.py \\
         --owner my-org \\
@@ -77,6 +80,36 @@ def gather_files(root: Path) -> list[Path]:
     return paths
 
 
+def build_replacements(args: argparse.Namespace) -> list[tuple[str, str]]:
+    """Build replacement pairs from flags and, optionally, interactive prompts."""
+    replacements: dict[str, str] = {}
+    for flag, placeholder, _ in PLACEHOLDERS:
+        value = getattr(args, flag.replace("-", "_"))
+        if value:
+            replacements[placeholder] = value
+
+    if not args.interactive:
+        return list(replacements.items())
+
+    print("Interactive placeholder setup")
+    print("Leave a value blank to skip it. Values passed as flags are kept.\n")
+
+    for flag, placeholder, help_text in PLACEHOLDERS:
+        if placeholder in replacements:
+            print(f"{placeholder} already set from --{flag}: {replacements[placeholder]}")
+            continue
+        try:
+            value = input(f"{placeholder} — {help_text} [skip]: ").strip()
+        except EOFError:
+            print()
+            break
+        if value:
+            replacements[placeholder] = value
+
+    print()
+    return list(replacements.items())
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         prog="fill-placeholders.py",
@@ -94,6 +127,11 @@ def main() -> int:
         action="store_true",
         help="Show what would change without writing files.",
     )
+    parser.add_argument(
+        "--interactive",
+        action="store_true",
+        help="Prompt for placeholder values in a terminal wizard. Blank answers are skipped.",
+    )
     args = parser.parse_args()
 
     root = Path(args.root).resolve()
@@ -101,15 +139,18 @@ def main() -> int:
         print(f"✗ Root does not exist: {root}", file=sys.stderr)
         return 1
 
-    # Build replacement map only for flags actually provided.
-    replacements: list[tuple[str, str]] = []
-    for flag, placeholder, _ in PLACEHOLDERS:
-        value = getattr(args, flag.replace("-", "_"))
-        if value:
-            replacements.append((placeholder, value))
+    replacements = build_replacements(args)
 
     if not replacements:
-        print("✗ No replacements specified. Pass at least --owner and --repo.", file=sys.stderr)
+        if args.interactive:
+            print(
+                "✗ No replacements specified. Interactive setup did not collect any values "
+                "(stdin may be closed).",
+                file=sys.stderr,
+            )
+            print("  Provide values at the prompts, pipe answers, or pass flags.", file=sys.stderr)
+        else:
+            print("✗ No replacements specified. Pass flags or run with --interactive.", file=sys.stderr)
         print("  Run with --help to see all flags.", file=sys.stderr)
         return 1
 
