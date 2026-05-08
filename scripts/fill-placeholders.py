@@ -82,24 +82,21 @@ def gather_files(root: Path) -> list[Path]:
 
 def build_replacements(args: argparse.Namespace) -> list[tuple[str, str]]:
     """Build replacement pairs from flags and, optionally, interactive prompts."""
-    replacements: list[tuple[str, str]] = []
-    provided: set[str] = set()
+    replacements: dict[str, str] = {}
     for flag, placeholder, _ in PLACEHOLDERS:
         value = getattr(args, flag.replace("-", "_"))
         if value:
-            replacements.append((placeholder, value))
-            provided.add(placeholder)
+            replacements[placeholder] = value
 
     if not args.interactive:
-        return replacements
+        return list(replacements.items())
 
     print("Interactive placeholder setup")
     print("Leave a value blank to skip it. Values passed as flags are kept.\n")
 
     for flag, placeholder, help_text in PLACEHOLDERS:
-        if placeholder in provided:
-            value = next(v for p, v in replacements if p == placeholder)
-            print(f"{placeholder} already set from --{flag}: {value}")
+        if placeholder in replacements:
+            print(f"{placeholder} already set from --{flag}: {replacements[placeholder]}")
             continue
         try:
             value = input(f"{placeholder} — {help_text} [skip]: ").strip()
@@ -107,10 +104,10 @@ def build_replacements(args: argparse.Namespace) -> list[tuple[str, str]]:
             print()
             break
         if value:
-            replacements.append((placeholder, value))
+            replacements[placeholder] = value
 
     print()
-    return replacements
+    return list(replacements.items())
 
 
 def main() -> int:
