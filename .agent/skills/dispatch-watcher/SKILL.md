@@ -1,11 +1,13 @@
 ---
 name: dispatch-watcher
-description: "Optional agent dispatch watcher. Use on agent session start when a Slack-style dispatch channel assigns GitHub issues to a model handle such as @codex or @claude."
+description: "Optional agent dispatch watcher — Phase 1 walking skeleton, Codex-flavored. Use on agent session start when a Slack-style dispatch channel assigns GitHub issues to a model handle such as @codex. For Claude use [[dispatch-watcher-claude]], for Gemini use [[dispatch-watcher-gemini]], for the full multi-agent contract see [[agent-presence]]."
 ---
 
 # Dispatch Watcher Skill
 
 Use this optional skill when a team runs a lightweight dispatch loop where humans or a PM agent post messages like `@codex #123` in a shared channel and an agent claims one GitHub issue at a time.
+
+> **Two phases.** This file is the Phase 1 walking-skeleton (Codex-flavored, one-shot, manual takeover only). Phase 2 — multi-agent coordination with leases, renewal, automatic takeover, and a pinned roster — lives in `.agent/skills/agent-presence/SKILL.md` + per-CLI adapters (`dispatch-watcher-claude`, `dispatch-watcher-gemini`). Phase 2 markers are **backwards-compatible** with Phase 1 (a Phase 1 marker is treated as `task: quick` with synthetic `lease_until = created_at + 4h`), so you can adopt them incrementally.
 
 ## Contract
 
@@ -155,12 +157,15 @@ On block, post:
 
 Do not delete the winning claim comment. It is the audit trail and prevents duplicate work.
 
-## Out Of Scope For This Template
+## Out Of Scope For This Phase 1 Skeleton
 
-- Long-running PM supervisor state machine.
+The following are addressed in `agent-presence` + the per-CLI adapters (`dispatch-watcher-claude`, `dispatch-watcher-gemini`); adopt them after the one-issue claim → branch → PR → completion path works reliably here:
+
 - Crash takeover via `<!-- takeover: ... -->` markers.
-- Multi-agent work stealing.
-- Automatic task selection beyond explicit channel dispatches.
-- Production-grade roster heartbeat.
+- Lease-based ownership with TTL renewal.
+- Multi-agent work stealing with `(created_at, id)` tiebreak.
+- Pinned-roster heartbeat / cache layer.
+- Per-CLI adapters (Claude MCP, Gemini curl, Codex curl) sharing one
+  `scripts/agent-presence-helpers.sh` library.
 
-Add those only after the one-issue claim -> branch -> PR -> completion path works reliably.
+Long-running PM supervisor state machines remain out of scope here too — keep this skill focused on the dispatch loop.

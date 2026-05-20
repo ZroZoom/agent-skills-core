@@ -4,14 +4,17 @@ Project-agnostic Claude Code / multi-agent skills extracted from a real Next.js 
 
 ## What's inside
 
-18 universal skills, organized into four groups:
+24 universal skills, organized into five groups:
 
 - **Engineering** (5): `code-quality`, `test-automation`, `test-manager`, `supabase-admin`, `frontend-system`
-- **Repo & PM** (7): `repo-ops`, `backlog-triage`, `delegate`, `review-agent`, `release-notes`, `product-manager`, `dispatch-watcher`
-- **Ops & business** (4): `demo-check`, `cost-check`, `investor-report`, `growth-strategist`
+- **Repo & PM** (7): `repo-ops`, `pr-merge`, `backlog-triage`, `delegate`, `review-agent`, `product-manager`, `session-self-analysis`
+- **Multi-agent coordination** (4): `agent-presence` (+ helper script), `dispatch-watcher-claude`, `dispatch-watcher-gemini`, `dispatch-watcher` (Codex)
+- **Ops & business** (6): `reporting-ops` (router) → `release-notes`, `demo-check`, `investor-report`, `cost-check`, `growth-strategist`
 - **Content** (2): `blog-editor`, `social-media`
 
 See [`.agent/AGENTS.md`](./.agent/AGENTS.md) for the full index and trigger phrases.
+
+> **Multi-agent coordination** is the major addition since the initial extraction. If you only run a single Claude / Codex session, the dispatch skills are inert — drop them. If you run two or more agents concurrently against the same repo (e.g. one Claude + one Codex), load `agent-presence` to keep them from stepping on each other.
 
 ## Quick start
 

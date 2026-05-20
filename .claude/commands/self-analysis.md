@@ -2,6 +2,8 @@
 
 Perform a self-analysis of the current session and record findings. Run at the end of a session or when the user has flagged issues.
 
+> **Skill contract for this workflow:** `.agent/skills/session-self-analysis/SKILL.md`. This command is the thin runner; the skill file is the authoritative reference.
+
 ## 1. Review Signals
 
 Analyze interactions in the current session:
