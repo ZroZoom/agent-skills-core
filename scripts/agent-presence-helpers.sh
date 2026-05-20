@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+# shellcheck shell=bash
+# shellcheck disable=SC2016
+#   ^ jq filters and GraphQL queries deliberately use single quotes; the `$x`
+#     tokens inside are jq variables passed via `--arg`, not shell variables.
+# shellcheck disable=SC2153
+#   ^ AGENT_ID is exported by the adapter before sourcing this library; the
+#     header documents this contract.
 # scripts/agent-presence-helpers.sh
 #
 # Shared shell library for the multi-agent presence + lease-based claim
@@ -806,9 +813,9 @@ Biorę #${issue_num} — ${AGENT_ID} (branch: ${branch}, PR: ${pr})"
     # Re-read with eventual-consistency retry (up to 3× × 2s).
     # Filter MUST include both <!-- claim: AND <!-- takeover: per spec §5.2 —
     # a takeover marker outranks the original claim it succeeded.
-    local attempt pages comments own_present winner now_epoch
+    local pages comments own_present winner now_epoch
     now_epoch=$(_aph_now_epoch)
-    for attempt in 1 2 3; do
+    for _attempt in 1 2 3; do
         if ! pages=$(GH_TOKEN="$GH_TOKEN_BOT" gh api --paginate --slurp \
             "repos/${REPO}/issues/${issue_num}/comments" 2>/dev/null); then
             echo "claim_issue: failed to re-read comments for #${issue_num}" >&2
@@ -1085,6 +1092,9 @@ shutdown_wrapper() {
     prev_term=$(trap -p TERM || true)
     prev_hup=$(trap -p HUP || true)
 
+    # shellcheck disable=SC2317
+    #   ^ this handler is invoked indirectly via the trap commands below;
+    #     shellcheck cannot see that callsite.
     _aph_shutdown_signal() {
         local signal="$1"
         trap_fired=1
