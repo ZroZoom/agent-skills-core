@@ -79,6 +79,12 @@ def resolve(source: Path, ref: str) -> Path | None:
         bare = ref.lstrip("./")
         if bare in IN_SCOPE_ROOT_FILES and (REPO_ROOT / bare).exists():
             target = (REPO_ROOT / bare).resolve()
+        # Repo-rooted paths to in-scope dirs (e.g. `scripts/foo.sh`, `.agent/skills/x/SKILL.md`)
+        # are commonly written without a leading slash. Resolve them from the
+        # repo root when the file actually exists there; this avoids spurious
+        # broken-link reports when a deep SKILL.md points at a shared script.
+        elif bare.startswith(IN_SCOPE_DIRS) and (REPO_ROOT / bare).exists():
+            target = (REPO_ROOT / bare).resolve()
         else:
             target = (source.parent / ref).resolve()
     # Only validate references inside the repo

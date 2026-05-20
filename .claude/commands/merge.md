@@ -2,6 +2,7 @@
 
 Merge a PR via the manual checklist (default) or via an automated merge supervisor (optional, project-specific).
 
+> **Skill contract for this workflow:** `.agent/skills/pr-merge/SKILL.md`.
 > **Authoritative reference for the manual loop:** `.agent/skills/repo-ops/SKILL.md` → section 9 (review threads) and `CLAUDE.md` → `PR Management`. **If a snippet here drifts from those, they win.**
 
 > **Required tooling:** `gh`, `git`, `jq`. Set `set -euo pipefail` at the top of any multi-step block.

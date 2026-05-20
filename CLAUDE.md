@@ -81,12 +81,18 @@ The slash commands in `.claude/commands/` follow these patterns — if you add n
 
 > Full details: `.agent/skills/repo-ops/SKILL.md`. Server-side enforcement: `.github/rulesets/main-branch-protection.json` (apply with `scripts/apply-rulesets.sh`).
 
-- **NEVER commit to `main`** — always use feature branches (`feature/*`, `fix/*`, `chore/*`)
+- **NEVER commit to `main`** — always use feature branches
 - **NEVER use `git stash`** — ask the user: "Keep (WIP commit) or discard?"
 - **Verify branch BEFORE EVERY commit**: `git branch --show-current` must NOT be `main` or `master`
+- **Branch naming**: `<type>/<slug>` where type ∈ `feat|feature|fix|chore|refactor|docs|perf|test|build|ci|style|hotfix|release`. This can be enforced as a ruleset (`Branch naming convention`) — a push of a branch outside the allowlist will be rejected.
 - **Workflow**: `git checkout -b feature/x` → changes → `git push` → PR
 
 > Some of these prohibitions can be enforced by hooks in `.claude/hookify.*.local.md` (only active when the [hookify](https://github.com/anthropics/claude-code-plugins/tree/main/hookify) Claude Code plugin is installed; plain `git`/shell invocations are unaffected). Disable a rule with `enabled: false` in its frontmatter.
+>
+> The shipped hooks (in `.claude/hookify-examples/`) cover:
+>
+> - **Block**: `--no-verify` / `--no-gpg-sign`, `git push --force` (and refspec `+`), `git stash`, `gh pr merge --admin`
+> - **Warn**: `git commit` (branch check), `git checkout -b` / `switch -c` (base check), edits to generated locale files, `git commit --allow-empty`
 
 **Session end checklist:**
 1. Commit all changes (including any generated files your build emits)
@@ -96,16 +102,40 @@ The slash commands in `.claude/commands/` follow these patterns — if you add n
 
 ## PR Management (CRITICAL)
 
-> Full checklist: `.claude/commands/merge.md`
+> Full checklist: `.claude/commands/merge.md` and `.agent/skills/pr-merge/SKILL.md`.
 
-Manual merge checklist:
+**PR title format (Conventional Commits).** A required `📝 PR Title` check (if configured) enforces:
+
+`<type>: <imperative subject>` where type ∈ `feat`, `fix`, `chore`, `refactor`, `docs`, `perf`, `test`, `build`, `ci`, `style`. The subject is lowercase, imperative, no trailing period. Example: `feat: add Polish content package`. PRs with non-matching titles are blocked from merge.
+
+Impact on automatic version bumps (if `auto-version-bump.yml` or equivalent is configured):
+
+| Prefix | Bump |
+|---|---|
+| `feat:` | minor |
+| `fix:`, `perf:` | patch |
+| `docs:`, `chore:`, `ci:`, `test:`, `refactor:`, `style:`, `build:` | skip |
+| Any prefix with `!:` (e.g. `feat!:`) or `BREAKING CHANGE:` in body | major |
+
+**Manual merge checklist:**
 
 1. **Resolve ALL review conversations** — including bot reviews (Copilot, Gemini, etc.). Use the GraphQL `resolveReviewThread` mutation — replying is NOT enough.
 2. **Verify CI is green** — `gh pr checks` must show all passing.
-3. **Update branch** if behind main — use GitHub API `update-branch` or rebase locally.
+3. **Update branch** if behind main — use the GitHub API `update-branch` endpoint or rebase locally.
 4. **Merge**: `gh pr merge --squash --auto` (works with merge queues; `--admin` is forbidden — it bypasses protection).
 
-If your repo has automated reviewers, wait ~2 min after each push before checking again. Unresolved conversations BLOCK merge — bot threads block just like human reviews.
+If your repo has a merge queue, `--auto` enqueues the PR. A solo PR may wait up to 30 min for a second PR to join the batch. E2E and smoke checks may run only once per batch in the queue (not on every PR push) — do not expect those checks to appear on `gh pr checks` for a PR.
+
+## PR Review Loop
+
+After every push to a PR:
+
+1. Wait ~2 min for automated reviewers (Copilot, Gemini, Codex, etc.).
+2. Check for new unresolved threads via the `reviewThreads` GraphQL query (do not rely on the bot's reply — replies do NOT resolve threads).
+3. Read each thread before resolving — don't mechanically bulk-resolve.
+4. Fix issues, resolve threads, push — repeat until clean.
+5. **Do NOT wait for the user to ask** "are there more comments?". The agent is responsible for clearing review threads proactively.
+6. Bot threads BLOCK merge just like human reviews.
 
 ## Type Safety
 
@@ -122,17 +152,20 @@ When a query/SDK doesn't compile — **FIRST regenerate types from your data lay
 | TypeScript / ESLint fixes  | `.agent/skills/code-quality/SKILL.md`      |
 | UI components, styling     | `.agent/skills/frontend-system/SKILL.md`   |
 | Git, Issues, PRs           | `.agent/skills/repo-ops/SKILL.md`          |
+| PR merge supervisor        | `.agent/skills/pr-merge/SKILL.md` / `.claude/commands/merge.md` |
 | Database migrations / RLS  | `.agent/skills/supabase-admin/SKILL.md`    |
 | E2E / Unit tests           | `.agent/skills/test-automation/SKILL.md`   |
 | Manual testing, PR testing | `.agent/skills/test-manager/SKILL.md`      |
 | Backlog triage             | `.agent/skills/backlog-triage/SKILL.md` / `.claude/commands/triage.md` |
 | Issue → agent prompt       | `.agent/skills/delegate/SKILL.md` / `.claude/commands/delegate.md` |
 | AI-agent PR review         | `.agent/skills/review-agent/SKILL.md` / `.claude/commands/review-agent.md` |
-| Release notes              | `.agent/skills/release-notes/SKILL.md` / `.claude/commands/release-notes.md` |
+| Operational reports        | `.agent/skills/reporting-ops/SKILL.md` (router: release-notes, demo-check, investor-report, cost-check) |
 | Release management         | `.agent/skills/product-manager/SKILL.md`   |
-| Demo readiness             | `.agent/skills/demo-check/SKILL.md` / `.claude/commands/demo-check.md` |
-| Stakeholder report         | `.agent/skills/investor-report/SKILL.md` / `.claude/commands/investor-report.md` |
-| Cost / domain monitoring   | `.agent/skills/cost-check/SKILL.md` / `.claude/commands/cost-check.md` |
+| Session retrospective      | `.agent/skills/session-self-analysis/SKILL.md` / `.claude/commands/self-analysis.md` |
+| Multi-agent presence       | `.agent/skills/agent-presence/SKILL.md` + `scripts/agent-presence-helpers.sh` |
+| Claude dispatch adapter    | `.agent/skills/dispatch-watcher-claude/SKILL.md` |
+| Gemini dispatch adapter    | `.agent/skills/dispatch-watcher-gemini/SKILL.md` |
+| Codex dispatch adapter     | `.agent/skills/dispatch-watcher/SKILL.md`  |
 | SEO, growth                | `.agent/skills/growth-strategist/SKILL.md` |
 | Blog editing               | `.agent/skills/blog-editor/SKILL.md`       |
 | Social media               | `.agent/skills/social-media/SKILL.md`      |
@@ -144,8 +177,10 @@ When a query/SDK doesn't compile — **FIRST regenerate types from your data lay
 | Skills index               | `.agent/AGENTS.md`                     |
 | Database / data context    | `.agent/context/database.md` *(create per project)* |
 | Session learnings          | `.agent/SESSION_LEARNINGS.md` *(append over time)* |
-| Cross-agent memory (SSOT)  | `.claude/memory/MEMORY.md` *(create per project)*  |
+| Cross-agent memory (SSOT)  | `.claude/memory/MEMORY.md`             |
 | Slash commands             | `.claude/commands/*.md`                |
+
+> 💡 **Cross-agent memory** at `.claude/memory/` is the tracked, repo-level SSOT shared across Claude / Codex / Copilot / Gemini sessions. Per-machine user memory (e.g. `~/.claude/projects/.../memory/` for Claude Code) is invisible to other agents. The `session-self-analysis` skill syncs new rules from user-memory → repo-memory at session end; `repo-status` / `repo-ops` may flag recent repo-memory changes at session start. When in doubt, write a learning to `.claude/memory/` so the next agent sees it.
 
 ## CI Monitoring
 
@@ -153,6 +188,17 @@ When a query/SDK doesn't compile — **FIRST regenerate types from your data lay
 - Wait for background task notification instead of repeated `grep pending`.
 - **CI job failed transiently?** (network timeout, API 500): `gh run rerun <run-id> --failed` — re-runs only failed jobs, no empty commit needed.
 - **CI not triggering?** Sometimes the `pull_request` event doesn't fire. Fix: `gh pr close <N> && gh pr reopen <N>`. If still stuck, push an empty commit: `git commit --allow-empty -m "chore: trigger CI"`.
+
+## Pre-push Hook Pitfalls
+
+If a pre-push hook runs `npm run build` (or equivalent), make sure the project's generators are **content-aware (skip-if-unchanged)** so the build leaves the working tree clean when no real changes occurred. Recommended pattern: parse the existing file, parse the freshly generated output, compare structurally, and only write to disk if they differ. EOL or whitespace differences alone should not trigger a rewrite.
+
+This avoids two common failure modes:
+
+1. The hook fails after a clean checkout because the build "changes" generated files (whitespace/EOL noise) and no one wants to commit those.
+2. The agent does `git status` after `npm run build`, sees unexpected modifications, and either commits noise or panics into a discard ritual.
+
+After resolving merge conflicts in generated files, regenerate cleanly with the project's generator (e.g. `npm run generate-index`) and stage the result.
 
 ## Post-Merge Checklist
 

@@ -54,6 +54,10 @@ PLACEHOLDERS: list[tuple[str, str, str]] = [
     ("storage-base-url",      "<STORAGE_BASE_URL>",      "Public base URL of the blog-images bucket"),
     ("product-stats-file",    "<PRODUCT_STATS_FILE>",    "Path to your generated product stats file"),
     ("demo-milestone",        "<DEMO_MILESTONE>",        "Milestone title used by /demo-check (e.g. M0)"),
+    # Multi-agent dispatch (optional — leave blank if not using agent-presence)
+    ("dispatch-channel",      "<DISPATCH_CHANNEL>",      "Slack channel name for multi-agent dispatch (e.g. #agent-dispatch)"),
+    ("dispatch-channel-id",   "<DISPATCH_CHANNEL_ID>",   "Slack channel ID (e.g. C0B25SWSUKS)"),
+    ("roster-message-ts",     "<ROSTER_MESSAGE_TS>",     "Pinned roster message timestamp (e.g. 1778500000.123456)"),
 ]
 
 # Files outside the repo's tracked content shouldn't be touched.

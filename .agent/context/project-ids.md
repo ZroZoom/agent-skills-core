@@ -116,6 +116,18 @@ Capture from the query above and paste here:
 | QA / tester | `<TESTER_HANDLE>` |
 | Content owner | `<CONTENT_OWNER_HANDLE>` |
 
+## Multi-agent dispatch (optional)
+
+> Only needed if you use the `agent-presence` skill + dispatch adapters (`dispatch-watcher-claude`, `dispatch-watcher-gemini`, `dispatch-watcher`). Otherwise leave blank.
+
+| Field | Value | How to find |
+|---|---|---|
+| Dispatch channel name | `<DISPATCH_CHANNEL>` | e.g. `#agent-dispatch`, `#proj-XYZ-agent-dispatch` |
+| Dispatch channel ID | `<DISPATCH_CHANNEL_ID>` | Slack channel ID (e.g. `C0B25SWSUKS`); right-click channel → "Copy link" → last path segment |
+| Pinned roster message TS | `<ROSTER_MESSAGE_TS>` | Slack message timestamp of the pinned roster message (e.g. `1778500000.123456`) |
+
+Adapters expect these as env vars (`ROSTER_CHANNEL_ID`, `ROSTER_MESSAGE_TS`) plus per-agent bot tokens (`GH_TOKEN_CLAUDE_BOT`, `GH_TOKEN_GEMINI_BOT`, `GH_TOKEN_CODEX_BOT`) and a model-agnostic `GH_TOKEN_BOT` resolved from the matching `*_BOT` variable. See `.agent/skills/agent-presence/SKILL.md` for the full contract.
+
 ## How skills consume this file
 
 A skill or slash command that needs an ID must:
