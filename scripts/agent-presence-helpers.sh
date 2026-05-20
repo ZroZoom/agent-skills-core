@@ -1092,9 +1092,9 @@ shutdown_wrapper() {
     prev_term=$(trap -p TERM || true)
     prev_hup=$(trap -p HUP || true)
 
+    # Invoked indirectly via the `trap` commands a few lines below; the
+    # linter cannot see that callsite, hence the per-function disable.
     # shellcheck disable=SC2317
-    #   ^ this handler is invoked indirectly via the trap commands below;
-    #     shellcheck cannot see that callsite.
     _aph_shutdown_signal() {
         local signal="$1"
         trap_fired=1
