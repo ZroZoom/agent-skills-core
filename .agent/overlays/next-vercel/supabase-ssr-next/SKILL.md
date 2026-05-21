@@ -33,6 +33,8 @@ export const supabase = createBrowserClient(
 
 ### Server client (Server Components / Route Handlers / Actions)
 
+> **Next.js 15+**: `cookies()` is async (`await cookies()`). On Next.js 14 and earlier it is synchronous — drop the `await` and make `createClient` non-async.
+
 ```ts
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";

@@ -27,6 +27,8 @@ const MoleculeViewer = dynamic(() => import("./MoleculeViewer"), {
 });
 ```
 
+> **Next.js 15+**: `dynamic(..., { ssr: false })` is rejected when called from a Server Component. Put this `dynamic()` call inside a `"use client"` wrapper component and render that from the server page.
+
 - `ssr: false` keeps them out of the server bundle and avoids hydration mismatches.
 - Keep the island's data contract serializable (per `@zrozoom/ui-components` adapter types if the project consumes them).
 - Lazy-load below the fold; render a skeleton sized to avoid layout shift (CLS).
