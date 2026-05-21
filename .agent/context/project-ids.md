@@ -128,6 +128,16 @@ Capture from the query above and paste here:
 
 Adapters expect these as env vars (`ROSTER_CHANNEL_ID`, `ROSTER_MESSAGE_TS`) plus per-agent bot tokens (`GH_TOKEN_CLAUDE_BOT`, `GH_TOKEN_GEMINI_BOT`, `GH_TOKEN_CODEX_BOT`) and a model-agnostic `GH_TOKEN_BOT` resolved from the matching `*_BOT` variable. See `.agent/skills/agent-presence/SKILL.md` for the full contract.
 
+## Vercel (only if the `next-vercel` overlay is enabled)
+
+> Only needed if you enabled the overlay with `scripts/enable-overlay.sh next-vercel`. Otherwise leave blank. See `.agent/overlays/next-vercel/README.md`.
+
+| Field | Value | How to find |
+|---|---|---|
+| Vercel project | `<VERCEL_PROJECT>` | Vercel project name (e.g. `fajnaszkola`) |
+| Vercel org / team | `<VERCEL_ORG>` | Vercel team slug (Settings → General) |
+| Production URL | `<VERCEL_PRODUCTION_URL>` | e.g. `https://fajnaszkola.pl` |
+
 ## How skills consume this file
 
 A skill or slash command that needs an ID must:
