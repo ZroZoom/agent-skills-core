@@ -16,6 +16,18 @@ See [`.agent/AGENTS.md`](./.agent/AGENTS.md) for the full index and trigger phra
 
 > **Multi-agent coordination** is the major addition since the initial extraction. If you only run a single Claude / Codex session, the dispatch skills are inert — drop them. If you run two or more agents concurrently against the same repo (e.g. one Claude + one Codex), load `agent-presence` to keep them from stepping on each other.
 
+### Stack overlays
+
+The base skills are stack-agnostic. Stack-specific additions live under `.agent/overlays/<name>/` and stay inert until you activate them:
+
+```bash
+scripts/enable-overlay.sh next-vercel   # copies overlay skills into .agent/skills/
+```
+
+- **`next-vercel`** — Next.js App Router + Vercel + `@supabase/ssr`: `frontend-next`, `supabase-ssr-next`, `deploy-vercel`, `cost-check-vercel`. See [`.agent/overlays/next-vercel/README.md`](./.agent/overlays/next-vercel/README.md).
+
+Overlays are the seam for using this template across stacks (e.g. Vite+Netlify base, Next+Vercel via overlay) without forking.
+
 ## Quick start
 
 1. Use this template (GitHub: "Use this template") or copy `.agent/`, `.claude/`, and `CLAUDE.md` into your repo.

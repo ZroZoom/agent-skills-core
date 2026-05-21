@@ -58,6 +58,10 @@ PLACEHOLDERS: list[tuple[str, str, str]] = [
     ("dispatch-channel",      "<DISPATCH_CHANNEL>",      "Slack channel name for multi-agent dispatch (e.g. #agent-dispatch)"),
     ("dispatch-channel-id",   "<DISPATCH_CHANNEL_ID>",   "Slack channel ID (e.g. C0B25SWSUKS)"),
     ("roster-message-ts",     "<ROSTER_MESSAGE_TS>",     "Pinned roster message timestamp (e.g. 1778500000.123456)"),
+    # Vercel (only relevant if the next-vercel overlay is enabled)
+    ("vercel-project",        "<VERCEL_PROJECT>",        "Vercel project name (e.g. fajnaszkola)"),
+    ("vercel-org",            "<VERCEL_ORG>",            "Vercel team / org slug"),
+    ("vercel-production-url", "<VERCEL_PRODUCTION_URL>", "Vercel production URL (e.g. https://fajnaszkola.pl)"),
 ]
 
 # Files outside the repo's tracked content shouldn't be touched.

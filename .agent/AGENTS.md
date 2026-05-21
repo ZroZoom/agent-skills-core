@@ -2,6 +2,8 @@
 
 > Universal agent skills, project-agnostic. Scan this index, then load files on-demand.
 
+> **Stack overlays.** Stack-specific skills live under `.agent/overlays/<name>/` and are inert until activated with `scripts/enable-overlay.sh <name>` (copies them into `.agent/skills/`). Available: `next-vercel` (Next.js App Router + Vercel + `@supabase/ssr`) — see `.agent/overlays/next-vercel/README.md`.
+
 ## Skills (load on-demand)
 
 ### Engineering
